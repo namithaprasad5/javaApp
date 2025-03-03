@@ -8,10 +8,10 @@
 <body>
     <h2>Enter Two Numbers</h2>
     <form action="sum" method="get">
-        <label for="num1">Number 1:</label>
+        <label for="num1">Numb 1:</label>
         <input type="text" id="num1" name="num1" required><br><br>
 
-        <label for="num2">Number 2:</label>
+        <label for="num2">Numb 2:</label>
         <input type="text" id="num2" name="num2" required><br><br>
 
         <input type="submit" value="Add">
