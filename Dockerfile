@@ -8,7 +8,7 @@ ENV CATALINA_HOME=/usr/local/tomcat
 COPY target/demo.war $CATALINA_HOME/webapps/
 
 # Expose Tomcat's port
-EXPOSE 8084
+EXPOSE 8080
 
 # Start Tomcat
 CMD ["catalina.sh", "run"]
