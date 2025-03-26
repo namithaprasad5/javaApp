@@ -41,9 +41,9 @@ jobs:
       - name: Run Tests
         run: mvn test
 
-      # Step 6: (Optional) Display Build Artifact (e.g., WAR/JAR)
+      # Step 6: Display Build Artifact
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.0
         with:
           name: build-artifact
           path: target/*.war
