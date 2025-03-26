@@ -1,4 +1,4 @@
-name: Build and Test Java Application
+name: Build and Test Java Application on Windows
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       # Step 1: Checkout the repository code
@@ -28,14 +28,14 @@ jobs:
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository
+          path: C:\Users\runneradmin\.m2\repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
       # Step 4: Build the application with Maven
       - name: Build with Maven
-        run: mvn clean package 
+        run: mvn clean package
 
       # Step 5: Run tests to verify the application
       - name: Run Tests
