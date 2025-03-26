@@ -41,8 +41,9 @@ jobs:
       - name: Run Tests
         run: mvn test
 
-      # Step 6: Upload build artifact (JAR or WAR)
+      # Step 6: Upload build artifact (JAR)
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
+        with:
           name: build-artifact
           path: target/*.jar
