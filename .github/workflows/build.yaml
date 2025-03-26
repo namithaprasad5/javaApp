@@ -43,7 +43,6 @@ jobs:
 
       # Step 6: Upload build artifact (JAR or WAR)
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
-        with:
+        uses: actions/upload-artifact@v4
           name: build-artifact
           path: target/*.jar
