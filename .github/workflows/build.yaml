@@ -41,29 +41,39 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact
-          path: target/*.war
+          name: demo-artifact
+          path: target/demo.war
 
-      # Step 6: Set up SSH key
+      # Step 6: Set up SSH key for Azure VM
       - name: Set up SSH key for Azure VM
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.AZURE_SSH_PRIVATE_KEY }}
 
-      # Step 7: Deploy to Remote Tomcat on Azure VM via SSH
-      - name: Deploy to Remote Tomcat
+      # Step 7: Deploy to Tomcat container on Azure VM
+      - name: Deploy to Tomcat inside Docker
         run: |
-          # Copy the WAR file to the Azure VM's Tomcat webapps directory
-          scp -o StrictHostKeyChecking=no target/*.war ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:/opt/tomcat/webapps/
+          # Securely copy the WAR file to Azure VM
+          scp -o StrictHostKeyChecking=no target/demo.war azureuser@${{ secrets.AZURE_VM_IP }}:/home/azureuser/
 
-          # Connect to the Azure VM and restart Tomcat
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << 'EOF'
-            # Stop Tomcat
-            sudo systemctl stop tomcat
+          # Log in to the Azure VM and deploy the WAR to Tomcat container
+          ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.AZURE_VM_IP }} << 'EOF'
+            # Container name (replace if different)
+            CONTAINER_NAME="my-tomcat-container"
 
-            # Start Tomcat
-            sudo systemctl start tomcat
+            # Verify container is running
+            if ! sudo docker ps --filter "name=$CONTAINER_NAME" --format "{{.Names}}" | grep -q "$CONTAINER_NAME"; then
+              echo "Error: Tomcat container '$CONTAINER_NAME' is not running."
+              exit 1
+            fi
 
-            # Monitor Tomcat logs to verify deployment
-            sudo tail -n 50 /opt/tomcat/logs/catalina.out
+            # Copy the WAR file to the Tomcat webapps directory inside the container
+            sudo docker cp /home/azureuser/demo.war $CONTAINER_NAME:/usr/local/tomcat/webapps/
+
+            # Restart the Tomcat service inside the container
+            sudo docker exec $CONTAINER_NAME catalina.sh stop
+            sudo docker exec $CONTAINER_NAME catalina.sh start
+
+            # Remove the WAR file from the VM
+            rm /home/azureuser/demo.war
           EOF
