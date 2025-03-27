@@ -1,4 +1,4 @@
-name: Build and Test Java Application on Windows
+name: Build, Test, and Deploy Java Application
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: windows-latest
+  build-test-deploy:
+    runs-on: ubuntu-latest
 
     steps:
       # Step 1: Checkout the repository code
@@ -28,7 +28,7 @@ jobs:
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
-          path: C:\Users\runneradmin\.m2\repository
+          path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
@@ -37,13 +37,29 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      # Step 5: Run tests to verify the application
-      - name: Run Tests
-        run: mvn test
-
-      # Step 6: Upload build artifact (WAR)
+      # Step 5: Upload build artifact
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
           path: target/*.war
+
+      # Step 6: Set up SSH key for Azure VM
+      - name: Set up SSH key for Azure VM
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AZURE_SSH_PRIVATE_KEY }}
+
+      # Step 7: Copy WAR file to Azure VM using SCP
+      - name: Copy WAR file to Tomcat
+        run: |
+          scp -o StrictHostKeyChecking=no target/*.war ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:/opt/tomcat/webapps/
+
+      # Step 8: Restart Tomcat on Azure VM
+      - name: Restart Tomcat on Azure VM
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << 'EOF'
+            sudo systemctl stop tomcat
+            sudo systemctl start tomcat
+            tail -f /opt/tomcat/logs/catalina.out
+          EOF
