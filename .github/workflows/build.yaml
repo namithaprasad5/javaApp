@@ -53,13 +53,16 @@ jobs:
       # Step 7: Copy WAR file to Azure VM using SCP
       - name: Copy WAR file to Tomcat
         run: |
-          scp -o StrictHostKeyChecking=no target/*.war ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:/opt/tomcat/webapps/
+          scp -v -o StrictHostKeyChecking=no target/*.war ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:/opt/tomcat/webapps/ || exit 1
 
       # Step 8: Restart Tomcat on Azure VM
       - name: Restart Tomcat on Azure VM
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << 'EOF'
-            sudo systemctl stop tomcat
-            sudo systemctl start tomcat
+          ssh -v -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << 'EOF'
+            # Check if Tomcat is running
+            systemctl is-active --quiet tomcat || (echo "Tomcat is not running. Starting Tomcat..."; sudo systemctl start tomcat)
+            # Restart Tomcat
+            sudo systemctl restart tomcat
+            # Follow Tomcat logs
             tail -f /opt/tomcat/logs/catalina.out
-          EOF
+          EOF || exit 1
