@@ -1,21 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-java-app
+  name: javaapp
+  namespace: dev-environment  # Match this with the service.yaml namespace
   labels:
-    app: my-java-app
+    app: javaapp  # This label should match the selector in service.yaml
 spec:
-  replicas: 2
+  replicas: 2  # Number of pods to deploy
   selector:
     matchLabels:
-      app: my-java-app
+      app: javaapp  # This selector should match the label in the service.yaml
   template:
     metadata:
       labels:
-        app: my-java-app
+        app: javaapp  # Ensure this label matches the service selector
     spec:
       containers:
-      - name: my-java-app
-        image: namitha5/my-tomcat-app123:latest  # Replace with your Docker image name
+      - name: javaapp
+        image: namitha5/my-tomcat-app123:latest  # Replace with your actual Docker image
         ports:
-        - containerPort: 8080
+        - containerPort: 8080  # This should match the targetPort in service.yaml
