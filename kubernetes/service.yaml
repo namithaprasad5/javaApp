@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: javaapp-service
+  namespace: dev-environment  # Replace with your actual namespace
 spec:
   selector:
     app: javaapp  # Ensure this matches the label in your Deployment.yaml
@@ -9,4 +10,4 @@ spec:
     - protocol: TCP
       port: 8080  # The port exposed outside the cluster
       targetPort: 8080  # The port your app is listening on inside the container
-  type: NodePort  # Use LoadBalancer for external access (or NodePort for Minikube).
+  type: NodePort  # Use LoadBalancer for external access (or NodePort for Minikube)
