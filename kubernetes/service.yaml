@@ -2,7 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: javaapp-service
-  namespace: dev-environment  # Add this line to specify the namespace
 spec:
   selector:
     app: javaapp  # Ensure this matches the label in your Deployment.yaml
